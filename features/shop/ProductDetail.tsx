@@ -1,0 +1,300 @@
+"use client";
+
+import Navbar from '@/components/Navbar';
+import Footer from '@/components/Footer';
+import {
+    FiMapPin, FiClock, FiShield, FiMessageCircle,
+    FiPhone, FiInfo, FiHeart, FiShare2, FiX, FiCheck
+} from 'react-icons/fi';
+import Link from 'next/link';
+import { useState, useEffect, Suspense } from 'react';
+import { useSearchParams, useRouter, usePathname } from 'next/navigation';
+
+interface ProductDetailProps {
+    id: string;
+}
+
+function ProductDetailContent({ id }: ProductDetailProps) {
+    const searchParams = useSearchParams();
+    const router = useRouter();
+    const pathname = usePathname();
+    const [isModalOpen, setIsModalOpen] = useState(false);
+    const [message, setMessage] = useState("");
+    const [showToast, setShowToast] = useState(false);
+
+    const templates = [
+        "Hi, is this still available?",
+        "I'm interested in this item. When is the best time to meet?",
+        "Is the price negotiable?"
+    ];
+
+    const handleShare = () => {
+        const url = `${window.location.origin}${pathname}`;
+        navigator.clipboard.writeText(url);
+        setShowToast(true);
+        setTimeout(() => setShowToast(false), 3000);
+    };
+
+    useEffect(() => {
+        if (searchParams.get('action') === 'get') {
+            setIsModalOpen(true);
+        }
+    }, [searchParams]);
+
+    const closeModal = () => {
+        setIsModalOpen(false);
+        // Clean up URL without refresh
+        router.replace(`/shop/${id}`, { scroll: false });
+    };
+
+    // Mock data
+    const product = {
+        title: "Tesla Model 3 Performance",
+        price: "$35,000",
+        location: "Tokyo, Japan",
+        condition: "Like New",
+        posted: "2 hours ago",
+        description: `Experience the future of driving with this pristine Tesla Model 3 Performance. This vehicle has been meticulously maintained and comes with a full service history. 
+    
+Key features include:
+• Dual Motor All-Wheel Drive
+• 0-60 mph in 3.1 seconds
+• 20" Überturbine Wheels
+• Performance Brakes and Carbon Fiber Spoiler
+• All-black premium interior
+
+Perfect for someone looking for speed, efficiency, and cutting-edge technology. Serious inquiries only please.`,
+        images: [
+            "/listing_vehicle_tesla_1769261698522.png",
+            "/listing_electronics_laptop_gaming_1769261730700.png",
+            "/listing_furniture_sofa_1769261712567.png"
+        ],
+        seller: {
+            name: "Marcus Chen",
+            rating: 4.9,
+            reviews: 124,
+            joined: "Jan 2023",
+            avatar: "MC",
+            phone: "+81 90-XXXX-XXXX"
+        }
+    };
+
+    return (
+        <main className="min-h-screen bg-white">
+            <Navbar />
+
+            <div className="container py-12">
+                <nav className="flex items-center gap-2 text-sm text-gray-500 mb-8 font-medium">
+                    <Link href="/" className="hover:text-primary transition-colors">Home</Link>
+                    <span>/</span>
+                    <Link href="/shop" className="hover:text-primary transition-colors">Shop</Link>
+                    <span>/</span>
+                    <span className="text-gray-900 truncate max-w-[200px]">{product.title}</span>
+                </nav>
+
+                <div className="grid grid-cols-1 lg:grid-cols-[1fr_400px] gap-12">
+                    <div className="space-y-10">
+                        <div className="space-y-4">
+                            <div className="aspect-16/10 bg-gray-100 rounded-3xl overflow-hidden relative group">
+                                <img src={product.images[0]} alt={product.title} className="w-full h-full object-cover" />
+                                <button className="absolute top-6 right-6 p-3 bg-white/90 backdrop-blur-md rounded-full shadow-lg hover:scale-110 transition-all text-gray-900 cursor-pointer">
+                                    <FiHeart size={20} />
+                                </button>
+                            </div>
+                            <div className="grid grid-cols-4 gap-4">
+                                {product.images.map((img, i) => (
+                                    <div key={i} className={`aspect-square rounded-xl overflow-hidden cursor-pointer border-2 transition-all ${i === 0 ? 'border-primary' : 'border-transparent hover:border-gray-300'}`}>
+                                        <img src={img} alt={`Thumb ${i}`} className="w-full h-full object-cover" />
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+
+                        <div className="space-y-6">
+                            <div className="flex flex-wrap items-center gap-4">
+                                <span className="bg-blue-50 text-primary text-xs font-bold px-3 py-1 rounded-full uppercase tracking-wider">
+                                    {product.condition}
+                                </span>
+                                <div className="flex items-center gap-1.5 text-gray-400 text-sm font-medium">
+                                    <FiClock size={14} />
+                                    <span>Posted {product.posted}</span>
+                                </div>
+                            </div>
+                            <h1 className="text-4xl md:text-5xl font-bold font-poppins text-black tracking-tight leading-tight">{product.title}</h1>
+                            <div className="flex items-center gap-2 text-gray-600 font-medium">
+                                <FiMapPin className="text-primary" />
+                                <span>{product.location}</span>
+                            </div>
+                            <div className="pt-4 border-t border-gray-100">
+                                <h3 className="text-xl font-bold mb-4 font-poppins text-black">Description</h3>
+                                <p className="text-gray-600 leading-relaxed whitespace-pre-line text-lg">{product.description}</p>
+                            </div>
+                        </div>
+
+                        <div className="bg-gray-50 border border-gray-100 p-8 rounded-2xl flex gap-6 items-start">
+                            <div className="p-3 bg-white rounded-xl text-primary shadow-sm"><FiShield size={24} /></div>
+                            <div>
+                                <h4 className="font-bold text-black mb-1">Safety First</h4>
+                                <p className="text-sm text-gray-500 leading-relaxed mb-4">Always meet in a public, well-lit place. Never send money before seeing the item.</p>
+                                <Link href="/safety" className="text-primary text-sm font-bold hover:underline">Read safety guide</Link>
+                            </div>
+                        </div>
+                    </div>
+
+                    <aside className="space-y-8">
+                        <div className="bg-white border border-gray-200 p-8 rounded-3xl shadow-sm sticky top-32">
+                            <div className="mb-6">
+                                <span className="text-sm text-gray-400 font-bold uppercase tracking-widest block mb-1">Asking Price</span>
+                                <div className="text-5xl font-black font-poppins text-black tracking-tighter">{product.price}</div>
+                            </div>
+                            <div className="space-y-4 mb-8">
+                                <button
+                                    onClick={() => setIsModalOpen(true)}
+                                    className="btn-primary w-full py-4 rounded-2xl font-bold text-lg flex items-center justify-center gap-2 hover:scale-[1.01] transition-all cursor-pointer"
+                                >
+                                    Get Item
+                                </button>
+                                <button
+                                    onClick={handleShare}
+                                    className="w-full py-4 rounded-2xl border-2 border-gray-100 bg-white text-gray-900 font-bold hover:bg-gray-50 transition-colors flex items-center justify-center gap-2 cursor-pointer active:scale-[0.98]"
+                                >
+                                    <FiShare2 size={18} />
+                                    Share listing
+                                </button>
+                            </div>
+
+                            <div className="pt-8 border-t border-gray-100 mt-2">
+                                <Link href="/user/1" className="flex items-center gap-4 mb-6 group cursor-pointer">
+                                    <div className="w-14 h-14 rounded-2xl bg-black text-white flex items-center justify-center font-bold text-xl group-hover:scale-105 transition-transform">{product.seller.avatar}</div>
+                                    <div>
+                                        <h4 className="font-bold text-black text-lg group-hover:text-primary transition-colors">{product.seller.name}</h4>
+                                        <div className="flex items-center gap-2 mt-0.5">
+                                            <div className="flex text-yellow-500">{"★".repeat(5)}</div>
+                                            <span className="text-sm text-gray-400 font-medium">({product.seller.reviews} reviews)</span>
+                                        </div>
+                                    </div>
+                                </Link>
+                                <div className="space-y-3 mb-8">
+                                    <div className="flex justify-between text-sm py-1">
+                                        <span className="text-gray-400 font-medium">Member Since</span>
+                                        <span className="text-gray-900 font-bold">{product.seller.joined}</span>
+                                    </div>
+                                    <div className="flex justify-between text-sm py-1">
+                                        <span className="text-gray-400 font-medium">Verifications</span>
+                                        <span className="text-green-600 font-bold">Email, Phone, Identity</span>
+                                    </div>
+                                </div>
+                                <div id="contact" className="space-y-4 pt-4">
+                                    <h3 className="text-lg font-bold font-poppins text-black flex items-center gap-2">
+                                        <FiMessageCircle className="text-primary" />
+                                        Message Seller
+                                    </h3>
+                                    <textarea
+                                        value={message}
+                                        onChange={(e) => setMessage(e.target.value)}
+                                        placeholder="Is this still available?"
+                                        className="w-full p-4 rounded-2xl bg-gray-50 border-none focus:ring-2 focus:ring-primary/20 transition-all outline-none text-sm min-h-[120px]"
+                                    />
+                                    <button className="btn-primary w-full py-3.5 rounded-xl font-bold flex items-center justify-center gap-2 cursor-pointer">Send Message</button>
+                                </div>
+                            </div>
+                        </div>
+                    </aside>
+                </div>
+            </div>
+
+            <Footer />
+
+            {/* Get Item Modal */}
+            {isModalOpen && (
+                <div className="fixed inset-0 z-[2000] flex items-center justify-center p-4">
+                    <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={closeModal} />
+                    <div className="relative bg-white w-full max-w-xl rounded-[32px] overflow-hidden shadow-2xl animate-in fade-in zoom-in duration-300">
+                        <button onClick={closeModal} className="absolute top-6 right-6 p-2 hover:bg-gray-100 rounded-full transition-colors cursor-pointer z-10">
+                            <FiX size={24} />
+                        </button>
+
+                        <div className="p-8 md:p-12">
+                            <div className="flex items-center gap-4 mb-8">
+                                <div className="p-3 bg-blue-50 text-primary rounded-2xl">
+                                    <FiShield size={28} />
+                                </div>
+                                <div>
+                                    <h2 className="text-2xl font-bold font-poppins text-black">Safety First</h2>
+                                    <p className="text-gray-500 font-medium">Keep your purchase secure</p>
+                                </div>
+                            </div>
+
+                            <div className="space-y-4 mb-10">
+                                <div className="flex gap-4 items-start">
+                                    <div className="mt-1 flex-shrink-0 w-5 h-5 rounded-full bg-green-50 text-green-600 flex items-center justify-center"><FiCheck size={14} strokeWidth={3} /></div>
+                                    <p className="text-gray-600 text-sm leading-relaxed"><span className="font-bold text-black">Meet in person:</span> Always inspect the item before paying.</p>
+                                </div>
+                                <div className="flex gap-4 items-start">
+                                    <div className="mt-1 flex-shrink-0 w-5 h-5 rounded-full bg-green-50 text-green-600 flex items-center justify-center"><FiCheck size={14} strokeWidth={3} /></div>
+                                    <p className="text-gray-600 text-sm leading-relaxed"><span className="font-bold text-black">Public places:</span> Choose a busy location for the exchange.</p>
+                                </div>
+                                <div className="flex gap-4 items-start">
+                                    <div className="mt-1 flex-shrink-0 w-5 h-5 rounded-full bg-green-50 text-green-600 flex items-center justify-center"><FiCheck size={14} strokeWidth={3} /></div>
+                                    <p className="text-gray-600 text-sm leading-relaxed"><span className="font-bold text-black">No deposits:</span> Never send money to hold an item.</p>
+                                </div>
+                            </div>
+
+                            <div className="space-y-6">
+                                <div>
+                                    <label className="block text-sm font-bold text-black mb-3 ml-1">Send a message to Marcus</label>
+                                    <textarea
+                                        value={message}
+                                        onChange={(e) => setMessage(e.target.value)}
+                                        placeholder="Type your message..."
+                                        className="w-full p-5 rounded-2xl bg-gray-50 border-none focus:ring-2 focus:ring-primary/20 transition-all outline-none text-base min-h-[140px] resize-none"
+                                    />
+                                </div>
+
+                                <div className="space-y-2">
+                                    <span className="text-[11px] font-black uppercase tracking-widest text-gray-400 ml-1">Quick Templates</span>
+                                    <div className="flex flex-wrap gap-2">
+                                        {templates.map((t, i) => (
+                                            <button
+                                                key={i}
+                                                onClick={() => setMessage(t)}
+                                                className="px-4 py-2 bg-gray-50 hover:bg-gray-100 rounded-full text-xs font-bold text-gray-700 transition-all cursor-pointer border border-gray-100"
+                                            >
+                                                {t}
+                                            </button>
+                                        ))}
+                                    </div>
+                                </div>
+
+                                <button className="btn-primary w-full py-4 rounded-2xl font-bold text-lg flex items-center justify-center gap-3 hover:scale-[1.01] transition-all cursor-pointer shadow-lg shadow-primary/20 mt-4">
+                                    <FiMessageCircle size={20} />
+                                    Send Interest
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {/* Notification Toast */}
+            {showToast && (
+                <div className="fixed bottom-10 left-1/2 -translate-x-1/2 z-[3000] animate-in fade-in slide-in-from-bottom-5 duration-300">
+                    <div className="bg-black text-white px-6 py-3 rounded-full shadow-2xl flex items-center gap-3">
+                        <div className="w-5 h-5 rounded-full bg-green-500 flex items-center justify-center">
+                            <FiCheck size={12} strokeWidth={4} />
+                        </div>
+                        <span className="text-sm font-bold tracking-tight">Link copied to clipboard</span>
+                    </div>
+                </div>
+            )}
+        </main>
+    );
+}
+
+export default function ProductDetail({ id }: ProductDetailProps) {
+    return (
+        <Suspense fallback={<div className="min-h-screen flex items-center justify-center bg-white"><div className="w-12 h-12 border-4 border-primary/20 border-t-primary rounded-full animate-spin"></div></div>}>
+            <ProductDetailContent id={id} />
+        </Suspense>
+    );
+}
