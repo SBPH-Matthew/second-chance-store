@@ -9,9 +9,17 @@
     "lint": "eslint"
   },
   "dependencies": {
+    "@clerk/nextjs": "^6.36.10",
+    "@tanstack/react-devtools": "^0.9.2",
+    "@tanstack/react-form": "^1.27.7",
+    "@tanstack/react-form-devtools": "^0.2.12",
+    "@tanstack/react-form-nextjs": "^1.27.7",
+    "@tanstack/react-query": "^5.90.20",
+    "@tanstack/react-query-devtools": "^5.91.2",
     "next": "16.1.4",
     "react": "19.2.3",
     "react-dom": "19.2.3",
+    "react-hook-form": "^7.71.1",
     "react-icons": "^5.5.0"
   },
   "devDependencies": {

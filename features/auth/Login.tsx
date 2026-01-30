@@ -6,21 +6,50 @@ import { useState } from 'react';
 import { FiEye, FiEyeOff, FiChevronLeft } from 'react-icons/fi';
 import { FcGoogle } from 'react-icons/fc';
 import { FaFacebook } from 'react-icons/fa';
+import { useLogin } from '@/lib/hooks/useAuth';
+import { ApiError } from '@/lib/api/client';
 
 export default function Login() {
+    const router = useRouter();
+    const loginMutation = useLogin();
     const [showPassword, setShowPassword] = useState(false);
     const [formData, setFormData] = useState({
         email: '',
         password: ''
     });
+    const [errors, setErrors] = useState<Record<string, string>>({});
+    const [generalError, setGeneralError] = useState<string>('');
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         setFormData({ ...formData, [e.target.name]: e.target.value });
+        // Clear errors when user starts typing
+        if (errors[e.target.name]) {
+            setErrors({ ...errors, [e.target.name]: '' });
+        }
+        if (generalError) {
+            setGeneralError('');
+        }
     };
 
-    const handleSubmit = (e: React.FormEvent) => {
+    const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-        // Login logic
+        setErrors({});
+        setGeneralError('');
+
+        try {
+            await loginMutation.mutateAsync({
+                email: formData.email,
+                password: formData.password,
+            });
+            // Redirect happens in the mutation's onSuccess
+        } catch (error: unknown) {
+            const apiError = error as ApiError;
+            if (apiError?.errors) {
+                setErrors(apiError.errors);
+            } else {
+                setGeneralError(apiError?.message || 'Login failed. Please check your credentials and try again.');
+            }
+        }
     };
 
     return (
@@ -83,6 +112,12 @@ export default function Login() {
                     </div>
 
                     <form onSubmit={handleSubmit} className="space-y-4">
+                        {generalError && (
+                            <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-xl text-sm font-medium">
+                                {generalError}
+                            </div>
+                        )}
+
                         <div className="space-y-1.5">
                             <label className="text-sm font-bold text-[#4B4B4B] ml-1">Email Address</label>
                             <input
@@ -92,8 +127,15 @@ export default function Login() {
                                 value={formData.email}
                                 onChange={handleChange}
                                 placeholder="jane@example.com"
-                                className="w-full px-4 py-2.5 rounded-xl bg-white border border-gray-100 focus:border-primary transition-all outline-none text-black font-medium text-sm"
+                                className={`w-full px-4 py-2.5 rounded-xl bg-white border transition-all outline-none text-black font-medium text-sm ${
+                                    errors.email 
+                                        ? 'border-red-300 focus:border-red-500' 
+                                        : 'border-gray-100 focus:border-primary'
+                                }`}
                             />
+                            {errors.email && (
+                                <p className="text-red-600 text-xs font-medium ml-1">{errors.email}</p>
+                            )}
                         </div>
 
                         <div className="space-y-1.5">
@@ -109,7 +151,11 @@ export default function Login() {
                                     value={formData.password}
                                     onChange={handleChange}
                                     placeholder="••••••••"
-                                    className="w-full px-4 py-2.5 rounded-xl bg-white border border-gray-100 focus:border-primary transition-all outline-none text-black font-medium text-sm"
+                                    className={`w-full px-4 py-2.5 rounded-xl bg-white border transition-all outline-none text-black font-medium text-sm ${
+                                        errors.password 
+                                            ? 'border-red-300 focus:border-red-500' 
+                                            : 'border-gray-100 focus:border-primary'
+                                    }`}
                                 />
                                 <button
                                     type="button"
@@ -119,13 +165,17 @@ export default function Login() {
                                     {showPassword ? <FiEyeOff size={18} /> : <FiEye size={18} />}
                                 </button>
                             </div>
+                            {errors.password && (
+                                <p className="text-red-600 text-xs font-medium ml-1">{errors.password}</p>
+                            )}
                         </div>
 
                         <button
                             type="submit"
-                            className="w-full bg-primary text-white py-4 rounded-xl font-bold text-base hover:bg-primary-hover transition-all mt-4 active:scale-[0.98]"
+                            disabled={loginMutation.isPending}
+                            className="w-full bg-primary text-white py-4 rounded-xl font-bold text-base hover:bg-primary-hover transition-all mt-4 active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed"
                         >
-                            Log In
+                            {loginMutation.isPending ? 'Logging in...' : 'Log In'}
                         </button>
                     </form>
 
