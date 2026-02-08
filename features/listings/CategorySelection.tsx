@@ -19,56 +19,59 @@ import {
 import WizardNav from "@/components/listing-wizard/WizardNav";
 import WizardProgress from "@/components/listing-wizard/WizardProgress";
 import WizardFooter from "@/components/listing-wizard/WizardFooter";
+import { LuArmchair, LuBaby, LuBike, LuBriefcase, LuBrush, LuFence, LuGamepad2, LuGem, LuLaptop, LuPawPrint, LuToyBrick, LuTv, LuVolleyball, LuWrench } from "react-icons/lu";
 
 // Icon mapping for categories
 const getCategoryIcon = (categoryName: string, isVehicle: boolean) => {
   if (isVehicle) return FiTruck;
 
   const name = categoryName.toLowerCase();
+  if (name.includes("garden")) return LuFence;
+  if (name.includes("furniture")) return LuArmchair;
+  if (name.includes("tool")) return LuWrench;
+  if (name.includes("appliance")) return LuTv;
   if (
     name.includes("home") ||
-    name.includes("garden") ||
-    name.includes("furniture") ||
-    name.includes("household") ||
-    name.includes("appliance")
+    name.includes("household")
   )
     return FiHome;
+  if (name.includes('toy')) return LuToyBrick;
+  if (name.includes("game")) return LuGamepad2;
   if (
     name.includes("entertainment") ||
-    name.includes("game") ||
     name.includes("music") ||
     name.includes("book") ||
     name.includes("movie")
   )
     return FiMusic;
+  if (name.includes('bag')) return LuBriefcase
+  if (name.includes("jewelry")) return LuGem
   if (
     name.includes("clothing") ||
-    name.includes("bag") ||
-    name.includes("jewelry") ||
     name.includes("shoe")
   )
     return FiShoppingBag;
+  if (name.includes('pet')) return LuPawPrint
+  if (name.includes('baby')) return LuBaby
   if (
     name.includes("family") ||
     name.includes("health") ||
-    name.includes("beauty") ||
-    name.includes("pet") ||
-    name.includes("baby") ||
-    name.includes("toy")
+    name.includes("beauty")
   )
     return FiHeart;
+  if (name.includes('computer')) return LuLaptop
   if (
     name.includes("electronic") ||
-    name.includes("computer") ||
     name.includes("phone") ||
     name.includes("mobile")
   )
     return FiSmartphone;
+  if (name.includes('bicycle')) return LuBike
+  if (name.includes('art')) return LuBrush
+  if (name.includes('sport')) return LuVolleyball
+  if (name.includes('auto')) return LuLaptop
   if (
     name.includes("hobbie") ||
-    name.includes("bicycle") ||
-    name.includes("art") ||
-    name.includes("sport") ||
     name.includes("auto") ||
     name.includes("instrument") ||
     name.includes("antique")
@@ -236,7 +239,6 @@ export default function CategorySelection() {
     return (
       <div className="min-h-screen bg-white">
         <WizardNav onSaveExit={() => router.push("/")} />
-        <WizardProgress value={25} />
         <div className="min-h-[calc(100vh-5rem)] flex items-center justify-center">
           <div className="text-gray-500">Loading...</div>
         </div>
@@ -254,7 +256,6 @@ export default function CategorySelection() {
     return (
       <div className="min-h-screen bg-white">
         <WizardNav onSaveExit={() => router.push("/")} />
-        <WizardProgress value={25} />
         <div className="min-h-[calc(100vh-5rem)] flex items-center justify-center">
           <div className="text-red-500">
             Error loading categories. Please try again.
@@ -276,7 +277,6 @@ export default function CategorySelection() {
   return (
     <div className="min-h-screen bg-white">
       <WizardNav onSaveExit={() => router.push("/")} />
-      <WizardProgress value={25} />
 
       <main className="px-6 pt-10 pb-28">
         <div className="mx-auto max-w-5xl">
@@ -341,6 +341,7 @@ export default function CategorySelection() {
         onBack={() => router.push("/")}
         onNext={goNext}
         nextDisabled={!selectedCategory}
+        progress={25}
       />
     </div>
   );

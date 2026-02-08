@@ -1,5 +1,7 @@
 "use client";
 
+import WizardProgress from "./WizardProgress";
+
 type WizardFooterProps = {
   backLabel?: string;
   nextLabel?: string;
@@ -7,6 +9,7 @@ type WizardFooterProps = {
   onNext?: () => void;
   backDisabled?: boolean;
   nextDisabled?: boolean;
+  progress?: number;
 };
 
 export default function WizardFooter({
@@ -16,10 +19,15 @@ export default function WizardFooter({
   onNext,
   backDisabled,
   nextDisabled,
+  progress,
 }: WizardFooterProps) {
   return (
     <footer className="fixed inset-x-0 bottom-0 z-50 bg-white">
-      <div className="border-t border-gray-200" />
+      {progress !== undefined ? (
+        <WizardProgress value={progress} />
+      ) : (
+        <div className="border-t border-gray-200" />
+      )}
       <div className="h-20 px-6 flex items-center justify-between">
         <button
           type="button"

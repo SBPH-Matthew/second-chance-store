@@ -30,10 +30,7 @@ export default function Navbar() {
 
     // Get avatar URL (use API base URL if profile_picture is a relative path)
     const getAvatarUrl = (profilePicture?: string) => {
-        if (!profilePicture) return null;
-        if (profilePicture.startsWith('http')) return profilePicture;
-        const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8080/api';
-        return `${API_BASE_URL}${profilePicture}`;
+        return profilePicture || null;
     };
 
     const handleLogout = () => {
@@ -47,8 +44,8 @@ export default function Navbar() {
         <nav className="h-16 flex items-center sticky top-0 z-50 border-b border-gray-100 bg-white">
             <div className="container flex justify-between items-center w-full">
                 {/* Logo */}
-                <Link 
-                    href="/" 
+                <Link
+                    href="/"
                     className="flex items-center gap-2.5 group transition-transform hover:scale-[1.02]"
                 >
                     <div className="w-9 h-9 bg-primary rounded-xl flex items-center justify-center text-white shrink-0 transition-all">
@@ -63,22 +60,22 @@ export default function Navbar() {
 
                 {/* Navigation Links */}
                 <div className="hidden lg:flex gap-8 items-center">
-                    <Link 
-                        href="/shop" 
+                    <Link
+                        href="/shop"
                         className="text-sm font-medium text-gray-600 hover:text-primary transition-colors relative group"
                     >
                         Browse listings
                         <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-primary transition-all group-hover:w-full" />
                     </Link>
-                    <Link 
-                        href="/list" 
+                    <Link
+                        href="/list"
                         className="text-sm font-medium text-gray-600 hover:text-primary transition-colors relative group"
                     >
                         List item
                         <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-primary transition-all group-hover:w-full" />
                     </Link>
-                    <Link 
-                        href="/about" 
+                    <Link
+                        href="/about"
                         className="text-sm font-medium text-gray-600 hover:text-primary transition-colors relative group"
                     >
                         About us
@@ -162,8 +159,8 @@ export default function Navbar() {
 
                                         {/* Menu Items */}
                                         <div className="py-1">
-                                <Link
-                                    href="/user/profile"
+                                            <Link
+                                                href="/user/profile"
                                                 onClick={() => setShowMenu(false)}
                                                 className="flex items-center gap-3 px-4 py-2.5 hover:bg-gray-50 transition-colors text-sm font-medium text-gray-700 group"
                                             >
@@ -197,14 +194,14 @@ export default function Navbar() {
                         </>
                     ) : (
                         <>
-                            <Link 
-                                href="/auth/login" 
+                            <Link
+                                href="/auth/login"
                                 className="hidden sm:block text-sm font-bold text-gray-700 px-4 py-2 rounded-xl hover:bg-gray-50 transition-colors"
                             >
                                 Sign in
                             </Link>
-                            <Link 
-                                href="/auth/register" 
+                            <Link
+                                href="/auth/register"
                                 className="btn-primary py-2.5 px-5 text-sm font-bold"
                             >
                                 Get Started

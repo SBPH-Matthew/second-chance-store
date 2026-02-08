@@ -44,6 +44,7 @@ export interface UserProfile {
   profile_picture?: string;
   role_id: number;
   created_at?: string;
+  CreatedAt?: string;
 }
 
 export interface ProfileResponse {
@@ -114,7 +115,7 @@ export const authApi = {
     formData.append('last_name', data.last_name);
     formData.append('email', data.email);
     formData.append('role', roleId.toString());
-    
+
     if (data.phone) formData.append('phone', data.phone);
     if (data.country) formData.append('country', data.country);
     if (data.state_province) formData.append('state_province', data.state_province);

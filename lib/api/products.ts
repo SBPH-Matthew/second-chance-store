@@ -3,6 +3,7 @@
  */
 
 import { apiClient } from './client';
+import { UserProfile } from './auth';
 
 export interface CreateProductRequest {
   name: string;
@@ -58,6 +59,7 @@ export interface Product {
   UpdatedAt?: string;
   item_type?: string;
   is_boosted?: boolean;
+  seller?: UserProfile;
 }
 
 export interface VehicleListing {
@@ -78,6 +80,7 @@ export interface VehicleListing {
   category?: Category;
   status?: ProductStatus;
   product_condition?: ProductCondition;
+  seller?: UserProfile;
 }
 
 export type ListingItem = Product | VehicleListing;
@@ -94,7 +97,7 @@ export const productsApi = {
    */
   createProduct: async (data: CreateProductRequest): Promise<CreateProductResponse> => {
     const formData = new FormData();
-    
+
     formData.append('name', data.name);
     formData.append('price', data.price.toString());
     formData.append('description', data.description || '');
@@ -167,5 +170,28 @@ export const productsApi = {
       total: response.products?.total ?? 0,
       items: response.products?.items ?? [],
     };
+  },
+
+  /**
+   * Get all product and vehicle listings (paginated)
+   */
+  getListings: async (page: number = 1, limit: number = 20, search?: string): Promise<MyProductsResult> => {
+    const searchParam = search ? `&search=${encodeURIComponent(search)}` : '';
+    const response = await apiClient.get<{
+      listings?: { total?: number; items?: ListingItem[] };
+    }>(`/listings?page=${page}&limit=${limit}${searchParam}`);
+
+    return {
+      total: response.listings?.total ?? 0,
+      items: response.listings?.items ?? [],
+    };
+  },
+
+  /**
+   * Get detail for a single product or vehicle listing
+   */
+  getListingDetails: async (id: string): Promise<ListingItem> => {
+    const response = await apiClient.get<{ item: ListingItem }>(`/product/${id}`);
+    return response.item;
   },
 };

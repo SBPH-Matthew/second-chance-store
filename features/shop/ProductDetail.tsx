@@ -15,6 +15,7 @@ import {
 import Link from "next/link";
 import { useState, useEffect, Suspense } from "react";
 import { useSearchParams, useRouter, usePathname } from "next/navigation";
+import { useListingDetails } from "@/lib/hooks/useListings";
 
 interface ProductDetailProps {
   id: string;
@@ -25,8 +26,12 @@ function ProductDetailContent({ id }: ProductDetailProps) {
   const router = useRouter();
   const pathname = usePathname();
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [activeImageIndex, setActiveImageIndex] = useState(0);
+  const [isLightboxOpen, setIsLightboxOpen] = useState(false);
   const [message, setMessage] = useState("");
   const [showToast, setShowToast] = useState(false);
+
+  const { data: item, isLoading, error } = useListingDetails(id);
 
   const templates = [
     "Hi, is this still available?",
@@ -53,35 +58,73 @@ function ProductDetailContent({ id }: ProductDetailProps) {
     router.replace(`/shop/${id}`, { scroll: false });
   };
 
-  // Mock data
-  const product = {
-    title: "Tesla Model 3 Performance",
-    price: "$35,000",
-    location: "Tokyo, Japan",
-    condition: "Like New",
-    posted: "2 hours ago",
-    description: `Experience the future of driving with this pristine Tesla Model 3 Performance. This vehicle has been meticulously maintained and comes with a full service history. 
-    
-Key features include:
-• Dual Motor All-Wheel Drive
-• 0-60 mph in 3.1 seconds
-• 20" Überturbine Wheels
-• Performance Brakes and Carbon Fiber Spoiler
-• All-black premium interior
+  const getImageUrl = (images: any, index?: number) => {
+    if (!images || (Array.isArray(images) && images.length === 0)) return "/listing_furniture_sofa_1769261712567.png";
+    if (typeof index === 'number') {
+      const img = images[index];
+      return img || "/listing_furniture_sofa_1769261712567.png";
+    }
+    const image = Array.isArray(images) ? images[0] : images;
+    if (typeof image !== 'string') return "/listing_furniture_sofa_1769261712567.png";
+    return image;
+  };
 
-Perfect for someone looking for speed, efficiency, and cutting-edge technology. Serious inquiries only please.`,
-    images: [
-      "/listing_vehicle_tesla_1769261698522.png",
-      "/listing_electronics_laptop_gaming_1769261730700.png",
-      "/listing_furniture_sofa_1769261712567.png",
-    ],
-    seller: {
+  const formatPrice = (price: number) => {
+    if (price === 0) return "Free";
+    return new Intl.NumberFormat("en-US", {
+      style: "currency",
+      currency: "USD",
+      maximumFractionDigits: 0,
+    }).format(price);
+  };
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-white">
+        <div className="w-12 h-12 border-4 border-primary/20 border-t-primary rounded-full animate-spin"></div>
+      </div>
+    );
+  }
+
+  if (error || !item) {
+    return (
+      <div className="min-h-screen flex flex-col items-center justify-center bg-white p-4">
+        <h2 className="text-2xl font-bold text-gray-900 mb-4">Listing not found</h2>
+        <p className="text-gray-500 mb-8">The item you are looking for may have been removed or is no longer available.</p>
+        <Link href="/shop" className="btn-primary px-8 py-3 rounded-xl font-bold">
+          Back to Shop
+        </Link>
+      </div>
+    );
+  }
+
+  // Map item to UI structure
+  const product = {
+    title: item.name,
+    price: formatPrice(item.price),
+    location: item.location,
+    condition: item.item_type === 'vehicle' ? 'Good' : ((item as any).product_condition?.name || 'Good'),
+    posted: item.CreatedAt ? new Date(item.CreatedAt).toLocaleDateString() : 'Recently',
+    description: item.description,
+    images: Array.isArray(item.images) && item.images.length > 0 ? item.images : ["/listing_furniture_sofa_1769261712567.png"],
+    seller: item.seller ? {
+      id: item.seller.id,
+      name: `${item.seller.first_name} ${item.seller.last_name}`,
+      rating: item.seller.rating || 0,
+      reviews: item.seller.total_reviews || 0,
+      joined: item.seller.CreatedAt ? new Date(item.seller.CreatedAt).toLocaleDateString('en-US', { month: 'short', year: 'numeric' }) : 'Jan 2024',
+      avatar: (item.seller.first_name?.[0] || "") + (item.seller.last_name?.[0] || ""),
+      phone: item.seller.phone || "Not provided",
+      identityVerified: item.seller.identity_verified,
+    } : {
+      id: 1,
       name: "Marcus Chen",
       rating: 4.9,
       reviews: 124,
       joined: "Jan 2023",
       avatar: "MC",
       phone: "+81 90-XXXX-XXXX",
+      identityVerified: true,
     },
   };
 
@@ -107,30 +150,45 @@ Perfect for someone looking for speed, efficiency, and cutting-edge technology. 
         <div className="grid grid-cols-1 lg:grid-cols-[1fr_400px] gap-12">
           <div className="space-y-10">
             <div className="space-y-4">
-              <div className="aspect-16/10 bg-gray-100 rounded-3xl overflow-hidden relative group">
+              <div
+                className="aspect-16/10 bg-gray-100 rounded-3xl overflow-hidden relative group cursor-zoom-in"
+                onClick={() => setIsLightboxOpen(true)}
+              >
                 <img
-                  src={product.images[0]}
+                  src={getImageUrl(product.images, activeImageIndex)}
                   alt={product.title}
-                  className="w-full h-full object-cover"
+                  className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
                 />
-                <button className="absolute top-6 right-6 p-3 bg-white/90 backdrop-blur-md rounded-full shadow-lg hover:scale-110 transition-all text-gray-900 cursor-pointer">
+                <button
+                  className="absolute top-6 right-6 p-3 bg-white/90 backdrop-blur-md rounded-full shadow-lg hover:scale-110 transition-all text-gray-900 cursor-pointer"
+                  onClick={(e) => { e.stopPropagation(); /* Favorite logic */ }}
+                >
                   <FiHeart size={20} />
                 </button>
+                <div className="absolute inset-0 bg-black/0 group-hover:bg-black/5 transition-colors flex items-center justify-center opacity-0 group-hover:opacity-100">
+                  <span className="bg-white/90 backdrop-blur-md px-6 py-2.5 rounded-full text-sm font-bold shadow-xl border border-white/20">
+                    Click to preview
+                  </span>
+                </div>
               </div>
-              <div className="grid grid-cols-4 gap-4">
-                {product.images.map((img, i) => (
-                  <div
-                    key={i}
-                    className={`aspect-square rounded-xl overflow-hidden cursor-pointer border-2 transition-all ${i === 0 ? "border-primary" : "border-transparent hover:border-gray-300"}`}
-                  >
-                    <img
-                      src={img}
-                      alt={`Thumb ${i}`}
-                      className="w-full h-full object-cover"
-                    />
-                  </div>
-                ))}
-              </div>
+
+              {product.images.length > 1 && (
+                <div className="grid grid-cols-6 gap-4">
+                  {product.images.map((img, i) => (
+                    <div
+                      key={i}
+                      onClick={() => setActiveImageIndex(i)}
+                      className={`aspect-square rounded-xl overflow-hidden cursor-pointer border-2 transition-all ${activeImageIndex === i ? "border-primary scale-95 shadow-inner" : "border-transparent hover:border-gray-200"}`}
+                    >
+                      <img
+                        src={getImageUrl(img)}
+                        alt={`Thumb ${i}`}
+                        className="w-full h-full object-cover"
+                      />
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
 
             <div className="space-y-6">
@@ -208,7 +266,7 @@ Perfect for someone looking for speed, efficiency, and cutting-edge technology. 
 
               <div className="pt-8 border-t border-gray-100 mt-2">
                 <Link
-                  href="/user/1"
+                  href={`/user/${product.seller.id}`}
                   className="flex items-center gap-4 mb-6 group cursor-pointer"
                 >
                   <div className="w-14 h-14 rounded-2xl bg-black text-white flex items-center justify-center font-bold text-xl group-hover:scale-105 transition-transform">
@@ -220,7 +278,8 @@ Perfect for someone looking for speed, efficiency, and cutting-edge technology. 
                     </h4>
                     <div className="flex items-center gap-2 mt-0.5">
                       <div className="flex text-yellow-500">
-                        {"★".repeat(5)}
+                        {"★".repeat(Math.round(product.seller.rating))}
+                        {"☆".repeat(5 - Math.round(product.seller.rating))}
                       </div>
                       <span className="text-sm text-gray-400 font-medium">
                         ({product.seller.reviews} reviews)
@@ -241,8 +300,8 @@ Perfect for someone looking for speed, efficiency, and cutting-edge technology. 
                     <span className="text-gray-400 font-medium">
                       Verifications
                     </span>
-                    <span className="text-green-600 font-bold">
-                      Email, Phone, Identity
+                    <span className={`${product.seller.identityVerified ? "text-green-600" : "text-yellow-600"} font-bold`}>
+                      {product.seller.identityVerified ? "Email, Phone, Identity" : "Email, Phone"}
                     </span>
                   </div>
                 </div>
@@ -268,6 +327,48 @@ Perfect for someone looking for speed, efficiency, and cutting-edge technology. 
       </div>
 
       <Footer />
+
+      {/* Image Preview Lightbox */}
+      {isLightboxOpen && (
+        <div className="fixed inset-0 z-3000 flex items-center justify-center p-4 md:p-12 animate-in fade-in duration-300">
+          <div
+            className="absolute inset-0 bg-black/95 backdrop-blur-xl"
+            onClick={() => setIsLightboxOpen(false)}
+          />
+          <button
+            onClick={() => setIsLightboxOpen(false)}
+            className="absolute top-8 right-8 p-3 bg-white/10 hover:bg-white/20 text-white rounded-full transition-all cursor-pointer z-10"
+          >
+            <FiX size={32} />
+          </button>
+
+          <div className="relative w-full h-full flex flex-col items-center justify-center gap-8">
+            <div className="relative max-w-5xl w-full aspect-16/10 rounded-3xl overflow-hidden shadow-2xl border border-white/10">
+              <img
+                src={getImageUrl(product.images, activeImageIndex)}
+                alt={product.title}
+                className="w-full h-full object-contain"
+              />
+            </div>
+
+            <div className="flex gap-3 p-4 bg-white/5 rounded-2xl backdrop-blur-md border border-white/10">
+              {product.images.map((img, i) => (
+                <div
+                  key={i}
+                  onClick={() => setActiveImageIndex(i)}
+                  className={`w-16 h-16 rounded-xl overflow-hidden cursor-pointer border-2 transition-all ${activeImageIndex === i ? "border-primary scale-110" : "border-transparent opacity-50 hover:opacity-100"}`}
+                >
+                  <img
+                    src={getImageUrl(img)}
+                    alt={`Preview ${i}`}
+                    className="w-full h-full object-cover"
+                  />
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Get Item Modal */}
       {isModalOpen && (
@@ -334,7 +435,7 @@ Perfect for someone looking for speed, efficiency, and cutting-edge technology. 
               <div className="space-y-6">
                 <div>
                   <label className="block text-sm font-bold text-black mb-3 ml-1">
-                    Send a message to Marcus
+                    Send a message to {product.seller.name}
                   </label>
                   <textarea
                     value={message}

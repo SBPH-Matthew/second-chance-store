@@ -54,6 +54,29 @@ export function useMyProducts(page: number = 1, limit: number = 20, enabled: boo
 }
 
 /**
+ * Hook to get all listings for the shop
+ */
+export function useListings(page: number = 1, limit: number = 20, search?: string) {
+  return useQuery({
+    queryKey: ['listings', page, limit, search],
+    queryFn: () => productsApi.getListings(page, limit, search),
+    staleTime: 30 * 1000,
+  });
+}
+
+/**
+ * Hook to get details for a single listing
+ */
+export function useListingDetails(id: string) {
+  return useQuery({
+    queryKey: ['listing', id],
+    queryFn: () => productsApi.getListingDetails(id),
+    enabled: !!id,
+    staleTime: 5 * 60 * 1000,
+  });
+}
+
+/**
  * Hook to get vehicle types
  */
 export function useVehicleTypes() {

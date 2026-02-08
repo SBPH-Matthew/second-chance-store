@@ -183,7 +183,6 @@ export default function ProductListingForm() {
     <VerificationGuard requireOnboarding requireVerification>
       <div className="min-h-screen bg-white">
         <WizardNav onSaveExit={() => router.push("/list")} />
-        <WizardProgress value={progress} />
 
         <main className="px-6 pt-10 pb-28">
           <div className="mx-auto max-w-4xl">
@@ -241,11 +240,10 @@ export default function ProductListingForm() {
                         onChange={handleChange}
                         placeholder="e.g., iPhone 13 Pro Max 256GB"
                         required
-                        className={`w-full px-5 py-4 rounded-xl border-2 transition-all outline-none text-black font-medium bg-gray-50 focus:bg-white ${
-                          errors.name
+                        className={`w-full px-5 py-4 rounded-xl border-2 transition-all outline-none text-black font-medium bg-gray-50 focus:bg-white ${errors.name
                             ? "border-red-300 focus:border-red-500 focus:ring-2 focus:ring-red-100"
                             : "border-gray-200 focus:border-primary focus:ring-2 focus:ring-primary/10"
-                        }`}
+                          }`}
                       />
                       {errors.name && (
                         <p className="text-red-600 text-xs font-medium mt-2 ml-1 flex items-center gap-1">
@@ -292,11 +290,10 @@ export default function ProductListingForm() {
                             step="0.01"
                             min="0"
                             required
-                            className={`w-full pl-10 pr-5 py-4 rounded-xl border-2 transition-all outline-none text-black font-medium bg-gray-50 focus:bg-white ${
-                              errors.price
+                            className={`w-full pl-10 pr-5 py-4 rounded-xl border-2 transition-all outline-none text-black font-medium bg-gray-50 focus:bg-white ${errors.price
                                 ? "border-red-300 focus:border-red-500 focus:ring-2 focus:ring-red-100"
                                 : "border-gray-200 focus:border-primary focus:ring-2 focus:ring-primary/10"
-                            }`}
+                              }`}
                           />
                         </div>
                         {errors.price && (
@@ -318,11 +315,10 @@ export default function ProductListingForm() {
                           onChange={handleChange}
                           placeholder="e.g., Manila, Metro Manila"
                           required
-                          className={`w-full px-5 py-4 rounded-xl border-2 transition-all outline-none text-black font-medium bg-gray-50 focus:bg-white ${
-                            errors.location
+                          className={`w-full px-5 py-4 rounded-xl border-2 transition-all outline-none text-black font-medium bg-gray-50 focus:bg-white ${errors.location
                               ? "border-red-300 focus:border-red-500 focus:ring-2 focus:ring-red-100"
                               : "border-gray-200 focus:border-primary focus:ring-2 focus:ring-primary/10"
-                          }`}
+                            }`}
                         />
                         {errors.location && (
                           <p className="text-red-600 text-xs font-medium mt-2 ml-1 flex items-center gap-1">
@@ -362,11 +358,10 @@ export default function ProductListingForm() {
                         value={formData.category}
                         onChange={handleChange}
                         required
-                        className={`w-full px-5 py-4 rounded-xl border-2 transition-all outline-none text-black font-medium bg-gray-50 focus:bg-white ${
-                          errors.category
+                        className={`w-full px-5 py-4 rounded-xl border-2 transition-all outline-none text-black font-medium bg-gray-50 focus:bg-white ${errors.category
                             ? "border-red-300 focus:border-red-500 focus:ring-2 focus:ring-red-100"
                             : "border-gray-200 focus:border-primary focus:ring-2 focus:ring-primary/10"
-                        }`}
+                          }`}
                       >
                         <option value="">Select category</option>
                         {categories?.map((cat) => (
@@ -391,11 +386,10 @@ export default function ProductListingForm() {
                         value={formData.condition}
                         onChange={handleChange}
                         required
-                        className={`w-full px-5 py-4 rounded-xl border-2 transition-all outline-none text-black font-medium bg-gray-50 focus:bg-white ${
-                          errors.condition
+                        className={`w-full px-5 py-4 rounded-xl border-2 transition-all outline-none text-black font-medium bg-gray-50 focus:bg-white ${errors.condition
                             ? "border-red-300 focus:border-red-500 focus:ring-2 focus:ring-red-100"
                             : "border-gray-200 focus:border-primary focus:ring-2 focus:ring-primary/10"
-                        }`}
+                          }`}
                       >
                         <option value="">Select condition</option>
                         {conditions?.map((cond) => (
@@ -420,11 +414,10 @@ export default function ProductListingForm() {
                         value={formData.status}
                         onChange={handleChange}
                         required
-                        className={`w-full px-5 py-4 rounded-xl border-2 transition-all outline-none text-black font-medium bg-gray-50 focus:bg-white ${
-                          errors.status
+                        className={`w-full px-5 py-4 rounded-xl border-2 transition-all outline-none text-black font-medium bg-gray-50 focus:bg-white ${errors.status
                             ? "border-red-300 focus:border-red-500 focus:ring-2 focus:ring-red-100"
                             : "border-gray-200 focus:border-primary focus:ring-2 focus:ring-primary/10"
-                        }`}
+                          }`}
                       >
                         <option value="">Select status</option>
                         {statuses?.map((status) => (
@@ -543,6 +536,7 @@ export default function ProductListingForm() {
           onBack={goBack}
           onNext={goNext}
           nextDisabled={createMutation.isPending}
+          progress={progress}
         />
       </div>
     </VerificationGuard>

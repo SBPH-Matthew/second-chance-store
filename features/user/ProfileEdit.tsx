@@ -10,15 +10,10 @@ import {
   useChangePassword,
 } from "@/lib/hooks/useAuth";
 import { ApiError } from "@/lib/api/client";
-import {
-  FiMapPin,
-  FiMail,
-  FiPhone,
-  FiLock,
-  FiCamera,
-  FiX,
-} from "react-icons/fi";
+import { FiMapPin, FiMail, FiPhone, FiLock, FiCamera, FiX, FiCheck } from "react-icons/fi";
 import { useForm } from "react-hook-form";
+import Cropper from "react-easy-crop";
+import getCroppedImg from "@/lib/utils/cropImage";
 
 interface ProfileFormData {
   first_name: string;
@@ -55,6 +50,14 @@ export default function ProfileEdit() {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const doneButtonRef = useRef<HTMLDivElement>(null);
   const [doneButtonPosition, setDoneButtonPosition] = useState<'visible' | 'above' | 'below'>('visible');
+
+  // Cropping states
+  const [crop, setCrop] = useState({ x: 0, y: 0 });
+  const [zoom, setZoom] = useState(1);
+  const [croppedAreaPixels, setCroppedAreaPixels] = useState<any>(null);
+  const [isCropping, setIsCropping] = useState(false);
+  const [tempImage, setTempImage] = useState<string | null>(null);
+  const [isProcessingCrop, setIsProcessingCrop] = useState(false);
 
   const {
     register: registerProfile,
@@ -187,12 +190,46 @@ export default function ProfileEdit() {
   ) => {
     const file = e.target.files?.[0];
     if (file) {
-      setProfilePicture(file);
       const reader = new FileReader();
       reader.onloadend = () => {
-        setProfilePicturePreview(reader.result as string);
+        setTempImage(reader.result as string);
+        setIsCropping(true);
       };
       reader.readAsDataURL(file);
+    }
+  };
+
+  const onCropComplete = (croppedArea: any, croppedAreaPixels: any) => {
+    setCroppedAreaPixels(croppedAreaPixels);
+  };
+
+  const handleApplyCrop = async () => {
+    if (!tempImage || !croppedAreaPixels) return;
+
+    setIsProcessingCrop(true);
+    try {
+      const croppedBlob = await getCroppedImg(tempImage, croppedAreaPixels);
+      if (croppedBlob) {
+        const croppedFile = new File([croppedBlob], "profile-picture.jpg", { type: "image/jpeg" });
+        setProfilePicture(croppedFile);
+
+        const previewUrl = URL.createObjectURL(croppedBlob);
+        setProfilePicturePreview(previewUrl);
+        setIsCropping(false);
+        setTempImage(null);
+      }
+    } catch (e) {
+      console.error(e);
+    } finally {
+      setIsProcessingCrop(false);
+    }
+  };
+
+  const handleCancelCrop = () => {
+    setIsCropping(false);
+    setTempImage(null);
+    if (fileInputRef.current) {
+      fileInputRef.current.value = "";
     }
   };
 
@@ -643,11 +680,10 @@ export default function ProfileEdit() {
               {/* Fixed Done Button (positioned based on scroll direction) */}
               {doneButtonPosition !== 'visible' && (
                 <div
-                  className={`fixed left-0 right-0 bg-white border-gray-100 p-4 z-50 transition-all ${
-                    doneButtonPosition === 'above'
+                  className={`fixed left-0 right-0 bg-white border-gray-100 p-4 z-50 transition-all ${doneButtonPosition === 'above'
                       ? 'top-0 border-b'
                       : 'bottom-0 border-t'
-                  }`}
+                    }`}
                 >
                   <div className="container">
                     <div className="flex justify-end gap-3">
@@ -777,6 +813,83 @@ export default function ProfileEdit() {
                 </button>
               </div>
             </form>
+          </div>
+        </div>
+      )}
+
+      {/* Image Cropping Modal */}
+      {isCropping && tempImage && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/90 backdrop-blur-md p-4 animate-in fade-in duration-300">
+          <div className="bg-white rounded-[32px] w-full max-w-2xl overflow-hidden shadow-2xl flex flex-col max-h-[90vh]">
+            <div className="p-6 border-b border-gray-100 flex items-center justify-between">
+              <h2 className="text-xl font-bold text-black font-poppins">Edit photo</h2>
+              <button
+                onClick={handleCancelCrop}
+                className="p-2 hover:bg-gray-100 rounded-full transition-colors"
+                disabled={isProcessingCrop}
+              >
+                <FiX size={24} className="text-gray-400" />
+              </button>
+            </div>
+
+            <div className="relative flex-1 bg-gray-950 min-h-[300px] md:min-h-[450px]">
+              <Cropper
+                image={tempImage}
+                crop={crop}
+                zoom={zoom}
+                aspect={1}
+                onCropChange={setCrop}
+                onCropComplete={onCropComplete}
+                onZoomChange={setZoom}
+                cropShape="round"
+                showGrid={false}
+              />
+            </div>
+
+            <div className="p-8 space-y-8 bg-white">
+              <div className="space-y-4">
+                <div className="flex justify-between text-xs font-bold uppercase tracking-widest text-gray-400">
+                  <span>Zoom</span>
+                  <span>{Math.round(zoom * 100)}%</span>
+                </div>
+                <input
+                  type="range"
+                  value={zoom}
+                  min={1}
+                  max={3}
+                  step={0.1}
+                  aria-labelledby="Zoom"
+                  onChange={(e) => setZoom(Number(e.target.value))}
+                  className="w-full h-1.5 bg-gray-100 rounded-lg appearance-none cursor-pointer accent-primary"
+                />
+              </div>
+
+              <div className="flex gap-4">
+                <button
+                  type="button"
+                  onClick={handleCancelCrop}
+                  className="flex-1 py-4 px-6 rounded-2xl border-2 border-gray-100 text-gray-700 font-bold hover:bg-gray-50 transition-all cursor-pointer"
+                  disabled={isProcessingCrop}
+                >
+                  Cancel
+                </button>
+                <button
+                  type="button"
+                  onClick={handleApplyCrop}
+                  disabled={isProcessingCrop}
+                  className="flex-[2] py-4 px-6 rounded-2xl bg-black text-white font-bold hover:bg-gray-800 transition-all shadow-lg shadow-black/10 flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50"
+                >
+                  {isProcessingCrop ? (
+                    <div className="w-5 h-5 border-2 border-white/20 border-t-white rounded-full animate-spin" />
+                  ) : (
+                    <>
+                      <FiCheck size={20} />
+                      Save photo
+                    </>
+                  )}
+                </button>
+              </div>
+            </div>
           </div>
         </div>
       )}

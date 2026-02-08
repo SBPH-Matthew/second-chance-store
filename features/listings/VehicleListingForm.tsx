@@ -146,7 +146,6 @@ export default function VehicleListingForm() {
     <VerificationGuard requireOnboarding requireVerification>
       <div className="min-h-screen bg-white">
         <WizardNav onSaveExit={() => router.push("/list")} />
-        <WizardProgress value={progress} />
 
         <main className="px-6 pt-10 pb-28">
           <div className="mx-auto max-w-4xl">
@@ -191,11 +190,10 @@ export default function VehicleListingForm() {
                           onChange={handleChange}
                           placeholder="e.g., Toyota"
                           required
-                          className={`w-full px-4 py-3 rounded-xl border transition-all outline-none text-black font-medium ${
-                            errors.vehicleMake
+                          className={`w-full px-4 py-3 rounded-xl border transition-all outline-none text-black font-medium ${errors.vehicleMake
                               ? "border-red-300 focus:border-red-500"
                               : "border-gray-100 focus:border-primary"
-                          }`}
+                            }`}
                         />
                         {errors.vehicleMake && (
                           <p className="text-red-600 text-xs font-medium ml-1 mt-1">
@@ -215,11 +213,10 @@ export default function VehicleListingForm() {
                           onChange={handleChange}
                           placeholder="e.g., Vios"
                           required
-                          className={`w-full px-4 py-3 rounded-xl border transition-all outline-none text-black font-medium ${
-                            errors.vehicleModel
+                          className={`w-full px-4 py-3 rounded-xl border transition-all outline-none text-black font-medium ${errors.vehicleModel
                               ? "border-red-300 focus:border-red-500"
                               : "border-gray-100 focus:border-primary"
-                          }`}
+                            }`}
                         />
                         {errors.vehicleModel && (
                           <p className="text-red-600 text-xs font-medium ml-1 mt-1">
@@ -239,11 +236,10 @@ export default function VehicleListingForm() {
                           value={formData.year}
                           onChange={handleChange}
                           required
-                          className={`w-full px-4 py-3 rounded-xl border transition-all outline-none text-black font-medium ${
-                            errors.year
+                          className={`w-full px-4 py-3 rounded-xl border transition-all outline-none text-black font-medium ${errors.year
                               ? "border-red-300 focus:border-red-500"
                               : "border-gray-100 focus:border-primary"
-                          }`}
+                            }`}
                         >
                           {years.map((year) => (
                             <option key={year} value={year.toString()}>
@@ -267,11 +263,10 @@ export default function VehicleListingForm() {
                           value={formData.vehicleType}
                           onChange={handleChange}
                           required
-                          className={`w-full px-4 py-3 rounded-xl border transition-all outline-none text-black font-medium ${
-                            errors.vehicleType
+                          className={`w-full px-4 py-3 rounded-xl border transition-all outline-none text-black font-medium ${errors.vehicleType
                               ? "border-red-300 focus:border-red-500"
                               : "border-gray-100 focus:border-primary"
-                          }`}
+                            }`}
                         >
                           <option value="">Select type</option>
                           {vehicleTypes?.map((type) => (
@@ -299,11 +294,10 @@ export default function VehicleListingForm() {
                           placeholder="0"
                           min="0"
                           required
-                          className={`w-full px-4 py-3 rounded-xl border transition-all outline-none text-black font-medium ${
-                            errors.price
+                          className={`w-full px-4 py-3 rounded-xl border transition-all outline-none text-black font-medium ${errors.price
                               ? "border-red-300 focus:border-red-500"
                               : "border-gray-100 focus:border-primary"
-                          }`}
+                            }`}
                         />
                         {errors.price && (
                           <p className="text-red-600 text-xs font-medium ml-1 mt-1">
@@ -338,11 +332,10 @@ export default function VehicleListingForm() {
                         onChange={handleChange}
                         placeholder="City, Province"
                         required
-                        className={`w-full px-4 py-3 rounded-xl border transition-all outline-none text-black font-medium ${
-                          errors.location
+                        className={`w-full px-4 py-3 rounded-xl border transition-all outline-none text-black font-medium ${errors.location
                             ? "border-red-300 focus:border-red-500"
                             : "border-gray-100 focus:border-primary"
-                        }`}
+                          }`}
                       />
                       {errors.location && (
                         <p className="text-red-600 text-xs font-medium ml-1 mt-1">
@@ -422,6 +415,7 @@ export default function VehicleListingForm() {
           onBack={goBack}
           onNext={goNext}
           nextDisabled={createMutation.isPending}
+          progress={progress}
         />
       </div>
     </VerificationGuard>
