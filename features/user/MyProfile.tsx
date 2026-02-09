@@ -128,11 +128,10 @@ export default function MyProfile() {
             <nav className="space-y-1">
               <button
                 onClick={() => setActiveTab("about")}
-                className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all text-left ${
-                  activeTab === "about"
-                    ? "bg-gray-100 text-black font-bold"
-                    : "text-gray-600 hover:bg-gray-50 font-medium"
-                }`}
+                className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all text-left ${activeTab === "about"
+                  ? "bg-gray-100 text-black font-bold"
+                  : "text-gray-600 hover:bg-gray-50 font-medium"
+                  }`}
               >
                 <div className="w-8 h-8 rounded-full bg-gray-800 flex items-center justify-center text-white text-xs font-bold shrink-0">
                   {avatarUrl ? (
@@ -150,11 +149,10 @@ export default function MyProfile() {
 
               <button
                 onClick={() => setActiveTab("listings")}
-                className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all text-left ${
-                  activeTab === "listings"
-                    ? "bg-gray-100 text-black font-bold"
-                    : "text-gray-600 hover:bg-gray-50 font-medium"
-                }`}
+                className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all text-left ${activeTab === "listings"
+                  ? "bg-gray-100 text-black font-bold"
+                  : "text-gray-600 hover:bg-gray-50 font-medium"
+                  }`}
               >
                 <FiBriefcase size={20} className="text-gray-400 shrink-0" />
                 <span>My listings</span>
@@ -162,11 +160,10 @@ export default function MyProfile() {
 
               <button
                 onClick={() => setActiveTab("reviews")}
-                className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all text-left ${
-                  activeTab === "reviews"
-                    ? "bg-gray-100 text-black font-bold"
-                    : "text-gray-600 hover:bg-gray-50 font-medium"
-                }`}
+                className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all text-left ${activeTab === "reviews"
+                  ? "bg-gray-100 text-black font-bold"
+                  : "text-gray-600 hover:bg-gray-50 font-medium"
+                  }`}
               >
                 <FiMessageCircle size={20} className="text-gray-400 shrink-0" />
                 <span>Reviews</span>
@@ -413,7 +410,7 @@ export default function MyProfile() {
                       <div className="divide-y divide-gray-100">
                         {recentProducts.map((product: any) => (
                           <div
-                            key={product.id}
+                            key={`${product.item_type || 'item'}-${product.id}`}
                             className="grid grid-cols-12 gap-4 px-6 py-4 hover:bg-gray-50 transition-colors"
                           >
                             <div className="col-span-4 flex items-center gap-3">
@@ -464,12 +461,13 @@ export default function MyProfile() {
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                       {recentProducts.map((product: any) => (
                         <div
-                          key={product.id}
+                          key={`${product.item_type || 'item'}-${product.id}`}
                           className="bg-white border border-gray-100 rounded-xl overflow-hidden hover:shadow-lg transition-shadow"
                         >
                           <div className="p-4">
                             <ProductCard
                               id={String(product.id)}
+                              type={product.item_type}
                               title={product.name || "Untitled Listing"}
                               price={formatPrice(product.price)}
                               location={product.location || "Not specified"}
@@ -485,7 +483,7 @@ export default function MyProfile() {
                               </span>
                               <span className="text-xs font-bold text-gray-700">
                                 {product.status?.name ||
-                                product.item_type === "vehicle"
+                                  product.item_type === "vehicle"
                                   ? "Active"
                                   : "Draft"}
                               </span>

@@ -165,8 +165,9 @@ export default function UserProfile({ id }: UserProfileProps) {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                 {allListings.map((item: any) => (
                   <ProductCard
-                    key={item.id}
+                    key={`${item.item_type || 'item'}-${item.id}`}
                     id={item.id.toString()}
+                    type={item.item_type}
                     title={item.name || `${item.vehicle_make} ${item.vehicle_model}`}
                     price={formatPrice(item.price)}
                     location={item.location}

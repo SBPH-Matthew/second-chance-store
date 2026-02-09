@@ -1,19 +1,35 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import Navbar from "@/components/Navbar";
 import ProductCard from "@/components/ProductCard";
 import Footer from "@/components/Footer";
 import { FiChevronLeft, FiChevronRight, FiSearch } from "react-icons/fi";
-import { useListings } from "@/lib/hooks/useListings";
+import { useListings, useCategories, useProductConditions } from "@/lib/hooks/useListings";
 
 export default function Shop() {
   const [page, setPage] = useState(1);
   const [search, setSearch] = useState("");
   const [searchInput, setSearchInput] = useState("");
+  const [selectedCategoryIds, setSelectedCategoryIds] = useState<number[]>([]);
+  const [selectedConditionIds, setSelectedConditionIds] = useState<number[]>([]);
+  const [minPrice, setMinPrice] = useState<string>("");
+  const [maxPrice, setMaxPrice] = useState<string>("");
+  const [sort, setSort] = useState<string>("newest");
+
   const limit = 12;
 
-  const { data, isLoading } = useListings(page, limit, search);
+  const filters = useMemo(() => ({
+    category_ids: selectedCategoryIds,
+    condition_ids: selectedConditionIds,
+    min_price: minPrice ? parseFloat(minPrice) : undefined,
+    max_price: maxPrice ? parseFloat(maxPrice) : undefined,
+    sort: sort,
+  }), [selectedCategoryIds, selectedConditionIds, minPrice, maxPrice, sort]);
+
+  const { data, isLoading } = useListings(page, limit, search, filters);
+  const { data: categories = [] } = useCategories();
+  const { data: conditions = [] } = useProductConditions();
 
   const listings = data?.items || [];
   const total = data?.total || 0;
@@ -22,6 +38,31 @@ export default function Shop() {
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
     setSearch(searchInput);
+    setPage(1);
+  };
+
+  const toggleCategory = (id: number) => {
+    setSelectedCategoryIds(prev =>
+      prev.includes(id) ? prev.filter(c => c !== id) : [...prev, id]
+    );
+    setPage(1);
+  };
+
+  const toggleCondition = (id: number) => {
+    setSelectedConditionIds(prev =>
+      prev.includes(id) ? prev.filter(c => c !== id) : [...prev, id]
+    );
+    setPage(1);
+  };
+
+  const handleReset = () => {
+    setSelectedCategoryIds([]);
+    setSelectedConditionIds([]);
+    setMinPrice("");
+    setMaxPrice("");
+    setSearch("");
+    setSearchInput("");
+    setSort("newest");
     setPage(1);
   };
 
@@ -72,39 +113,39 @@ export default function Shop() {
                 <h2 className="text-xl font-bold font-poppins text-black">
                   Filters
                 </h2>
-                <button className="text-sm font-semibold text-primary">
+                <button
+                  onClick={handleReset}
+                  className="text-sm font-semibold text-primary hover:underline"
+                >
                   Reset
                 </button>
               </div>
 
               <div className="mb-8">
-                <h3 className="text-[11px] font-bold mb-5">Categories</h3>
-                <div className="space-y-3">
-                  {[
-                    "All Categories",
-                    "Vehicles",
-                    "Electronics",
-                    "Furniture",
-                    "Fashion",
-                    "Real Estate",
-                    "Hobbies",
-                  ].map((cat) => (
+                <h3 className="text-[11px] font-bold mb-5 uppercase tracking-wider text-gray-400">Categories</h3>
+                <div className="space-y-3 max-h-60 overflow-y-auto pr-2 custom-scrollbar">
+                  {categories.map((cat) => (
                     <label
-                      key={cat}
+                      key={cat.id}
                       className="flex items-center gap-3 text-[15px] font-medium cursor-pointer group"
                     >
                       <input
                         type="checkbox"
+                        checked={selectedCategoryIds.includes(cat.id)}
+                        onChange={() => toggleCategory(cat.id)}
                         className="w-5 h-5 rounded border-gray-300 accent-black focus:ring-black cursor-pointer"
                       />
-                      <span className="text-gray-700">{cat}</span>
+                      <span className={`${selectedCategoryIds.includes(cat.id) ? 'text-black font-bold' : 'text-gray-700'} group-hover:text-black transition-colors truncate`}>
+                        {cat.name}
+                      </span>
                     </label>
                   ))}
+                  {categories.length === 0 && <p className="text-gray-400 text-sm">No categories found</p>}
                 </div>
               </div>
 
               <div className="mb-8 border-t border-gray-100 pt-8">
-                <h3 className="text-[11px] font-bold mb-5">Price Range</h3>
+                <h3 className="text-[11px] font-bold mb-5 uppercase tracking-wider text-gray-400">Price Range</h3>
                 <div className="flex gap-3">
                   <div className="relative flex-1">
                     <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-sm">
@@ -113,7 +154,9 @@ export default function Shop() {
                     <input
                       type="number"
                       placeholder="Min"
-                      className="w-full pl-7 pr-3 py-2.5 text-sm rounded-lg border border-gray-200 outline-none"
+                      value={minPrice}
+                      onChange={(e) => { setMinPrice(e.target.value); setPage(1); }}
+                      className="w-full pl-7 pr-3 py-2.5 text-sm rounded-lg border border-gray-200 outline-none focus:border-black transition-colors"
                     />
                   </div>
                   <div className="relative flex-1">
@@ -123,32 +166,39 @@ export default function Shop() {
                     <input
                       type="number"
                       placeholder="Max"
-                      className="w-full pl-7 pr-3 py-2.5 text-sm rounded-lg border border-gray-200 outline-none"
+                      value={maxPrice}
+                      onChange={(e) => { setMaxPrice(e.target.value); setPage(1); }}
+                      className="w-full pl-7 pr-3 py-2.5 text-sm rounded-lg border border-gray-200 outline-none focus:border-black transition-colors"
                     />
                   </div>
                 </div>
               </div>
 
               <div className="mb-10 border-t border-gray-100 pt-8">
-                <h3 className="text-[11px] font-bold mb-5">Condition</h3>
+                <h3 className="text-[11px] font-bold mb-5 uppercase tracking-wider text-gray-400">Condition</h3>
                 <div className="space-y-3">
-                  {["New", "Like New", "Good", "Fair"].map((cond) => (
+                  {conditions.map((cond) => (
                     <label
-                      key={cond}
+                      key={cond.id}
                       className="flex items-center gap-3 text-[15px] font-medium cursor-pointer group"
                     >
                       <input
                         type="checkbox"
+                        checked={selectedConditionIds.includes(cond.id)}
+                        onChange={() => toggleCondition(cond.id)}
                         className="w-5 h-5 rounded border-gray-300 accent-black focus:ring-black cursor-pointer"
                       />
-                      <span className="text-gray-700">{cond}</span>
+                      <span className={`${selectedConditionIds.includes(cond.id) ? 'text-black font-bold' : 'text-gray-700'} group-hover:text-black transition-colors`}>
+                        {cond.name}
+                      </span>
                     </label>
                   ))}
+                  {conditions.length === 0 && <p className="text-gray-400 text-sm">No conditions found</p>}
                 </div>
               </div>
 
               <form onSubmit={handleSearch} className="mb-10 border-t border-gray-100 pt-8">
-                <h3 className="text-[11px] font-bold mb-5">Search keyword</h3>
+                <h3 className="text-[11px] font-bold mb-5 uppercase tracking-wider text-gray-400">Search keyword</h3>
                 <div className="relative">
                   <FiSearch className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
                   <input
@@ -179,10 +229,14 @@ export default function Shop() {
                 <span className="text-sm text-gray-400 font-bold uppercase tracking-tight">
                   Sort by
                 </span>
-                <select className="pl-4 pr-10 py-2.5 text-sm rounded-xl border border-gray-200 bg-white outline-none font-bold text-gray-700 cursor-pointer">
-                  <option>Newest First</option>
-                  <option>Price: Low to High</option>
-                  <option>Price: High to Low</option>
+                <select
+                  value={sort}
+                  onChange={(e) => { setSort(e.target.value); setPage(1); }}
+                  className="pl-4 pr-10 py-2.5 text-sm rounded-xl border border-gray-200 bg-white outline-none font-bold text-gray-700 cursor-pointer focus:border-black transition-colors"
+                >
+                  <option value="newest">Newest First</option>
+                  <option value="price_asc">Price: Low to High</option>
+                  <option value="price_desc">Price: High to Low</option>
                 </select>
               </div>
             </div>
@@ -199,6 +253,7 @@ export default function Shop() {
                   <div key={`${item.item_type}-${item.id}`}>
                     <ProductCard
                       id={String(item.id)}
+                      type={item.item_type}
                       title={item.name}
                       price={formatPrice(item.price)}
                       location={item.location}
@@ -213,10 +268,10 @@ export default function Shop() {
               <div className="text-center py-20 bg-gray-50 rounded-3xl border-2 border-dashed border-gray-200">
                 <p className="text-gray-500 font-medium">No listings found matching your search.</p>
                 <button
-                  onClick={() => { setSearch(""); setSearchInput(""); }}
+                  onClick={handleReset}
                   className="mt-4 text-primary font-bold hover:underline"
                 >
-                  Clear search
+                  Clear all filters
                 </button>
               </div>
             )}

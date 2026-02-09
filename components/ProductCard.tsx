@@ -3,6 +3,7 @@ import Link from 'next/link';
 
 interface ProductCardProps {
     id: string;
+    type?: string;
     title: string;
     price: string;
     location: string;
@@ -11,7 +12,10 @@ interface ProductCardProps {
     disableHover?: boolean;
 }
 
-export default function ProductCard({ id, title, price, location, imageUrl, isFree, disableHover }: ProductCardProps) {
+export default function ProductCard({ id, type, title, price, location, imageUrl, isFree, disableHover }: ProductCardProps) {
+    const detailUrl = type ? `/shop/${id}?type=${type}` : `/shop/${id}`;
+    const getUrl = type ? `/shop/${id}?action=get&type=${type}` : `/shop/${id}?action=get`;
+
     return (
         <div className="group relative flex flex-col bg-white">
             {/* Image Wrapper */}
@@ -54,14 +58,14 @@ export default function ProductCard({ id, title, price, location, imageUrl, isFr
 
                 <div className="pt-2 flex items-center justify-center gap-3 w-full">
                     <Link
-                        href={`/shop/${id}`}
+                        href={detailUrl}
                         className={`btn-primary rounded-full flex-1 py-2.5 text-[13px] font-bold text-center cursor-pointer whitespace-nowrap ${disableHover ? '' : 'transition-all'
                             }`}
                     >
                         Learn more
                     </Link>
                     <Link
-                        href={`/shop/${id}?action=get`}
+                        href={getUrl}
                         className={`flex-1 text-gray-900 text-[13px] font-bold flex items-center justify-center gap-1 py-2.5 rounded-full border border-gray-200 cursor-pointer ${disableHover ? '' : 'hover:bg-gray-50 transition-colors'
                             }`}
                     >

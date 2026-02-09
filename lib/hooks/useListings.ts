@@ -4,7 +4,7 @@
 
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useRouter } from 'next/navigation';
-import { productsApi, CreateProductRequest, Category, ProductCondition, ProductStatus } from '@/lib/api/products';
+import { productsApi, CreateProductRequest, Category, ProductCondition, ProductStatus, ListingFilters } from '@/lib/api/products';
 import { vehiclesApi, CreateVehicleRequest, VehicleType } from '@/lib/api/vehicles';
 import { ApiError } from '@/lib/api/client';
 
@@ -56,10 +56,10 @@ export function useMyProducts(page: number = 1, limit: number = 20, enabled: boo
 /**
  * Hook to get all listings for the shop
  */
-export function useListings(page: number = 1, limit: number = 20, search?: string) {
+export function useListings(page: number = 1, limit: number = 20, search?: string, filters?: ListingFilters) {
   return useQuery({
-    queryKey: ['listings', page, limit, search],
-    queryFn: () => productsApi.getListings(page, limit, search),
+    queryKey: ['listings', page, limit, search, filters],
+    queryFn: () => productsApi.getListings(page, limit, search, filters),
     staleTime: 30 * 1000,
   });
 }
@@ -67,10 +67,10 @@ export function useListings(page: number = 1, limit: number = 20, search?: strin
 /**
  * Hook to get details for a single listing
  */
-export function useListingDetails(id: string) {
+export function useListingDetails(id: string, type?: string) {
   return useQuery({
-    queryKey: ['listing', id],
-    queryFn: () => productsApi.getListingDetails(id),
+    queryKey: ['listing', id, type],
+    queryFn: () => productsApi.getListingDetails(id, type),
     enabled: !!id,
     staleTime: 5 * 60 * 1000,
   });

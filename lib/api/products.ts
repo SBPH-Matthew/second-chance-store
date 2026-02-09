@@ -90,6 +90,14 @@ export interface MyProductsResult {
   items: ListingItem[];
 }
 
+export interface ListingFilters {
+  category_ids?: number[];
+  min_price?: number;
+  max_price?: number;
+  condition_ids?: number[];
+  sort?: string;
+}
+
 export const productsApi = {
   /**
    * Create a new product listing
@@ -164,7 +172,7 @@ export const productsApi = {
   getMyProducts: async (page: number = 1, limit: number = 20): Promise<MyProductsResult> => {
     const response = await apiClient.get<{
       products?: { total?: number; items?: ListingItem[] };
-    }>(`/product/self?page=${page}&limit=${limit}`);
+    }>(`/listings/self?page=${page}&limit=${limit}`);
 
     return {
       total: response.products?.total ?? 0,
@@ -175,11 +183,18 @@ export const productsApi = {
   /**
    * Get all product and vehicle listings (paginated)
    */
-  getListings: async (page: number = 1, limit: number = 20, search?: string): Promise<MyProductsResult> => {
-    const searchParam = search ? `&search=${encodeURIComponent(search)}` : '';
+  getListings: async (page: number = 1, limit: number = 20, search?: string, filters?: ListingFilters): Promise<MyProductsResult> => {
+    let query = `/listings?page=${page}&limit=${limit}`;
+    if (search) query += `&search=${encodeURIComponent(search)}`;
+    if (filters?.category_ids && filters.category_ids.length > 0) query += `&category_ids=${filters.category_ids.join(',')}`;
+    if (filters?.min_price) query += `&min_price=${filters.min_price}`;
+    if (filters?.max_price) query += `&max_price=${filters.max_price}`;
+    if (filters?.condition_ids && filters.condition_ids.length > 0) query += `&condition_ids=${filters.condition_ids.join(',')}`;
+    if (filters?.sort) query += `&sort=${filters.sort}`;
+
     const response = await apiClient.get<{
       listings?: { total?: number; items?: ListingItem[] };
-    }>(`/listings?page=${page}&limit=${limit}${searchParam}`);
+    }>(query);
 
     return {
       total: response.listings?.total ?? 0,
@@ -190,8 +205,9 @@ export const productsApi = {
   /**
    * Get detail for a single product or vehicle listing
    */
-  getListingDetails: async (id: string): Promise<ListingItem> => {
-    const response = await apiClient.get<{ item: ListingItem }>(`/product/${id}`);
+  getListingDetails: async (id: string, type?: string): Promise<ListingItem> => {
+    const typeQuery = type ? `?type=${type}` : '';
+    const response = await apiClient.get<{ item: ListingItem }>(`/listings/${id}${typeQuery}`);
     return response.item;
   },
 };

@@ -31,7 +31,8 @@ function ProductDetailContent({ id }: ProductDetailProps) {
   const [message, setMessage] = useState("");
   const [showToast, setShowToast] = useState(false);
 
-  const { data: item, isLoading, error } = useListingDetails(id);
+  const itemType = searchParams.get("type") || undefined;
+  const { data: item, isLoading, error } = useListingDetails(id, itemType);
 
   const templates = [
     "Hi, is this still available?",
@@ -77,6 +78,26 @@ function ProductDetailContent({ id }: ProductDetailProps) {
       maximumFractionDigits: 0,
     }).format(price);
   };
+
+  // Keyboard navigation for lightbox
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (!isLightboxOpen || !item?.images) return;
+
+      const images = Array.isArray(item.images) && item.images.length > 0 ? item.images : ["/listing_furniture_sofa_1769261712567.png"];
+
+      if (e.key === "Escape") {
+        setIsLightboxOpen(false);
+      } else if (e.key === "ArrowLeft") {
+        setActiveImageIndex((prev) => (prev > 0 ? prev - 1 : images.length - 1));
+      } else if (e.key === "ArrowRight") {
+        setActiveImageIndex((prev) => (prev < images.length - 1 ? prev + 1 : 0));
+      }
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [isLightboxOpen, item?.images]);
 
   if (isLoading) {
     return (
@@ -127,6 +148,7 @@ function ProductDetailContent({ id }: ProductDetailProps) {
       identityVerified: true,
     },
   };
+
 
   return (
     <main className="min-h-screen bg-white">

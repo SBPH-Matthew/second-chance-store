@@ -81,6 +81,13 @@ export default function Navbar() {
                         About us
                         <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-primary transition-all group-hover:w-full" />
                     </Link>
+                    <Link
+                        href="/safety"
+                        className="text-sm font-medium text-gray-600 hover:text-primary transition-colors relative group"
+                    >
+                        Safety
+                        <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-primary transition-all group-hover:w-full" />
+                    </Link>
                 </div>
 
                 {/* Right Side - Auth or User Menu */}
@@ -95,7 +102,7 @@ export default function Navbar() {
                             {/* Avatar Button - Links to Profile */}
                             <Link
                                 href="/user/profile"
-                                className="relative w-10 h-10 rounded-full flex items-center justify-center overflow-hidden transition-transform hover:scale-105 active:scale-95"
+                                className="relative w-10 h-10 rounded-full flex items-center justify-center transition-transform hover:scale-105 active:scale-95"
                             >
                                 <div className="w-full h-full rounded-full bg-gray-800 flex items-center justify-center text-white font-bold text-sm">
                                     {getAvatarUrl(profile.profile_picture) ? (
@@ -109,7 +116,7 @@ export default function Navbar() {
                                     )}
                                 </div>
                                 {profile.identity_verified && (
-                                    <div className="absolute -bottom-0.5 -right-0.5 w-3.5 h-3.5 bg-white rounded-full flex items-center justify-center border-2 border-white">
+                                    <div className="absolute z-10 -bottom-0.5 -right-0.5 w-3.5 h-3.5 bg-white rounded-full flex items-center justify-center border-2 border-white">
                                         <FiCheckCircle className="text-primary" size={10} />
                                     </div>
                                 )}
