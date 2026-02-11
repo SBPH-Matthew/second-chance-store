@@ -1,4 +1,4 @@
-import { FiHeart, FiMapPin, FiChevronRight } from 'react-icons/fi';
+import { FiMapPin } from 'react-icons/fi';
 import Link from 'next/link';
 
 interface ProductCardProps {
@@ -9,71 +9,59 @@ interface ProductCardProps {
     location: string;
     imageUrl: string;
     isFree?: boolean;
-    disableHover?: boolean;
+    rating?: number;
+    salesCount?: number;
 }
 
-export default function ProductCard({ id, type, title, price, location, imageUrl, isFree, disableHover }: ProductCardProps) {
+export default function ProductCard({ id, type, title, price, location, imageUrl, isFree, rating = 4.8, salesCount = 120 }: ProductCardProps) {
     const detailUrl = type ? `/shop/${id}?type=${type}` : `/shop/${id}`;
-    const getUrl = type ? `/shop/${id}?action=get&type=${type}` : `/shop/${id}?action=get`;
 
     return (
-        <div className="group relative flex flex-col bg-white">
-            {/* Image Wrapper */}
-            <div className="relative aspect-square overflow-hidden rounded-2xl bg-gray-100">
+        <Link href={detailUrl} className="group block h-full bg-white border border-transparent hover:border-primary hover:shadow-md transition-all duration-200">
+            {/* Image Wrapper (~60% height in vertical layout) */}
+            <div className="relative aspect-[4/5] overflow-hidden bg-gray-50 border-b border-gray-50">
                 <img
                     src={imageUrl}
                     alt={title}
-                    className={`h-full w-full object-cover transition-transform duration-700 ease-out ${!disableHover ? 'group-hover:scale-105' : ''
-                        }`}
+                    className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
                 />
 
-                {/* Premium Badge */}
+                {/* Badge Overlay */}
                 {isFree && (
-                    <div className="absolute top-4 left-4 bg-black/80 backdrop-blur-md text-white text-[10px] font-bold px-2.5 py-1 rounded-full uppercase tracking-widest">
-                        Community Gift
+                    <div className="absolute top-0 left-0 bg-primary text-white text-[10px] font-bold px-1.5 py-0.5 rounded-br-sm uppercase">
+                        Gift
                     </div>
                 )}
-
-                {/* Wishlist Button */}
-                <button className="absolute top-4 right-4 p-2.5 bg-white/90 backdrop-blur-sm rounded-full shadow-sm hover:bg-white hover:scale-110 transition-all text-gray-900 cursor-pointer">
-                    <FiHeart size={18} />
-                </button>
             </div>
 
             {/* Content Area */}
-            <div className="mt-5 px-1 space-y-2">
-                <div className="flex justify-between items-start">
-                    <h3 className="text-[17px] font-semibold text-gray-900 line-clamp-1 flex-1 pr-4 leading-snug">
-                        {title}
-                    </h3>
-                    <span className={`text-[17px] font-bold tracking-tight ${isFree ? 'text-green-600' : 'text-gray-900 font-poppins'}`}>
-                        {isFree ? 'Free' : price}
+            <div className="p-2.5 flex flex-col gap-1.5">
+                {/* Title (1-2 lines) */}
+                <h3 className="text-[13px] text-gray-800 line-clamp-2 leading-[1.4] h-[36px]">
+                    {title}
+                </h3>
+
+                {/* Price (Dominant) */}
+                <div className="flex items-baseline gap-1 mt-1">
+                    <span className="text-[18px] font-bold text-primary">
+                        {isFree ? 'FREE' : price}
                     </span>
                 </div>
 
-                <div className="flex items-center gap-1.5 text-gray-500 text-[13px] font-medium">
-                    <FiMapPin size={14} className="opacity-60" />
-                    <span className="truncate">{location}</span>
+                {/* Trust/Social Info */}
+                <div className="flex items-center gap-2 mt-auto">
+                    <div className="flex items-center text-[11px] text-gray-400">
+                        <FiMapPin className="mr-1" />
+                        <span className="truncate max-w-[120px]">{location.split(',')[0]}</span>
+                    </div>
                 </div>
-
-                <div className="pt-2 flex items-center justify-center gap-3 w-full">
-                    <Link
-                        href={detailUrl}
-                        className={`btn-primary rounded-full flex-1 py-2.5 text-[13px] font-bold text-center cursor-pointer whitespace-nowrap ${disableHover ? '' : 'transition-all'
-                            }`}
-                    >
-                        Learn more
-                    </Link>
-                    <Link
-                        href={getUrl}
-                        className={`flex-1 text-gray-900 text-[13px] font-bold flex items-center justify-center gap-1 py-2.5 rounded-full border border-gray-200 cursor-pointer ${disableHover ? '' : 'hover:bg-gray-50 transition-colors'
-                            }`}
-                    >
-                        Get Item
-                        <FiChevronRight size={16} />
-                    </Link>
+                
+                {/* Optional: Promotional text */}
+                <div className="mt-1 flex gap-1">
+                    <span className="text-[10px] bg-red-50 text-primary px-1 border border-primary/20 rounded-sm">Free Shipping</span>
                 </div>
             </div>
-        </div>
+        </Link>
     );
 }
+

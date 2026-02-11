@@ -22,7 +22,7 @@ export default function WizardFooter({
   progress,
 }: WizardFooterProps) {
   return (
-    <footer className="fixed inset-x-0 bottom-0 z-50 bg-white">
+    <footer className="fixed inset-x-0 bottom-0 z-50 bg-white  "> 
       {progress !== undefined ? (
         <WizardProgress value={progress} />
       ) : (
